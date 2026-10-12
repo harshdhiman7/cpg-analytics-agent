@@ -29,7 +29,7 @@ Example questions:
      ┌─────────────────────────┐
      │  FastMCP server         │
      │  • calculate_price_...  │ ──▶ pandas / sklearn / XGBoost
-     │  • _forecast_demand     │ ◀── data/retail_data.csv
+     │  • _forecast_demand     │ ◀── data/your_retail_data.csv
      └─────────────────────────┘
 ```
 
@@ -42,7 +42,7 @@ cpg-analytics-agent/
 ├── agent.py                          # LangGraph agent + system prompt + CLI
 ├── mcp_servers/
 │   ├── __init__.py
-│   └── price_elasticity_server.py    # FastMCP server exposing the analytics tools
+│   └── pricing.py    # FastMCP server exposing the analytics tools
 ├── config.yaml                       # Data path and forecasting settings
 ├── data/                             # Put your dataset here (git-ignored)
 ├── requirements.txt
