@@ -1,0 +1,11 @@
+mcp>=1.2.0
+langchain-mcp-adapters
+langchain-core
+langchain-ollama
+langgraph
+pandas
+numpy
+scikit-learn
+xgboost
+pyyaml
+openpyxl

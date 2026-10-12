@@ -1,0 +1,272 @@
+# ============================================================
+# Agentic CPG Pricing Analytics Configuration
+# ============================================================
+
+application:
+  name: "agentic-cpg-pricing"
+  version: "1.0.0"
+  environment: "development"
+
+# ============================================================
+# LLM Configuration
+# ============================================================
+
+llm:
+  provider: "ollama"
+  model: "qwen2.5:3b"
+  temperature: 0.0
+
+# ============================================================
+# MCP Servers
+# ============================================================
+
+mcp_servers:
+
+  data:
+    name: "RetailDataServer"
+    command: "python"
+    args:
+      - "mcp_servers/data_server.py"
+    transport: "stdio"
+
+  pricing:
+    name: "PricingAnalyticsServer"
+    command: "python"
+    args:
+      - "mcp_servers/pricing.py"
+    transport: "stdio"
+
+  optimization:
+    name: "PricingOptimizationServer"
+    command: "python"
+    args:
+      - "mcp_servers/optimization_server.py"
+    transport: "stdio"
+
+# ============================================================
+# Data Configuration
+# ============================================================
+
+data:
+  source: "csv"
+  path: "data/dataset.csv"
+
+  identifiers:
+    product: "UPC"
+
+  measures:
+    units: "UNITS"
+    price: "PRICE"
+
+  promotion_variables:
+    - "FEATURE"
+    - "DISPLAY"
+    - "TPR_ONLY"
+
+  product_description:
+    column: "DESCRIPTION"
+
+# ============================================================
+# Elasticity Model
+# ============================================================
+
+elasticity:
+
+  model_type: "multivariate_log_log_ols"
+
+  target:
+    column: "UNITS"
+    transformation: "log"
+
+  price:
+    column: "PRICE"
+    transformation: "log"
+
+  controls:
+    - "FEATURE"
+    - "DISPLAY"
+    - "TPR_ONLY"
+
+  minimum_observations: 5
+
+  metrics:
+    - "elasticity"
+    - "r_squared"
+    - "sample_size"
+    - "average_price"
+
+# ============================================================
+# Pricing Simulation
+# ============================================================
+
+simulation:
+
+  demand_model: "constant_elasticity"
+
+  price_change:
+    min_percent: -20
+    max_percent: 20
+    step_percent: 5
+
+  outputs:
+    - "predicted_units"
+    - "unit_change_pct"
+    - "predicted_revenue"
+    - "revenue_change_pct"
+
+# ===========================================================
+# Demand Forecasting
+# ============================================================
+
+forecast:
+   
+   hierarchy: "CATEGORY"
+   name: "BAG SNACKS"
+
+   horizon: 12
+    
+   target_variable: "UNITS"
+   
+   required_data:
+    - "UNITS"
+    - "BASE_PRICE"
+    - "PRICE"
+    - "FEATURE"
+    - "DISPLAY"
+    - "TPR_ONLY"
+   data_preprocessing:
+    missing_value_strategy:
+      UNITS: "zero_fill"
+      BASE_PRICE: "forward_fill"
+      PRICE: "forward_fill"
+      FEATURE: 0
+      DISPLAY: 0
+      TPR_ONLY: 0
+    derived_features:
+      discount_depth: "(BASE_PRICE - PRICE) / BASE_PRICE"
+      is_promoted: "FEATURE == 1 or DISPLAY == 1 or TPR_ONLY == 1" 
+   modeling:
+      hierarchy: "category"
+      models:
+        xgboost: XGBRegressor()
+        prophet: Prophet()  
+
+         
+
+# ============================================================
+# Price Optimization
+# ============================================================
+
+optimization:
+
+  objective: "revenue"
+
+  price_search:
+    enabled: true
+    steps: 50
+
+  constraints:
+    minimum_price: null
+    maximum_price: null
+    maximum_price_change_pct: 15
+
+  outputs:
+    - "optimal_price"
+    - "predicted_units"
+    - "predicted_revenue"
+
+# ============================================================
+# Business Interpretation
+# ============================================================
+
+business_rules:
+
+  elasticity:
+
+    elastic_threshold: 1.0
+
+    interpretations:
+      elastic: >
+        Demand is relatively sensitive to price changes.
+        Price increases may result in proportionally larger
+        declines in volume.
+
+      inelastic: >
+        Demand is relatively less sensitive to price changes.
+        Price changes may have a smaller proportional impact
+        on volume.
+
+  promotion:
+
+    meaningful_lift_threshold_pct: 10
+
+  pricing:
+
+    significant_revenue_change_threshold_pct: 5
+
+# ============================================================
+# Agent Behavior
+# ============================================================
+
+agent:
+
+  role: "CPG/Retail Pricing Strategy Analyst"
+
+  objectives:
+    - "Translate pricing analytics into business insights"
+    - "Quantify price sensitivity"
+    - "Evaluate price change scenarios"
+    - "Analyze promotional effectiveness"
+    - "Identify pricing opportunities"
+    - "Support revenue management decisions"
+
+  principles:
+
+    - "Use MCP for all data access"
+    - "Do not directly access datasets"
+    - "Do not fabricate missing information"
+    - "Separate observed data from model estimates"
+    - "Explain analytical results in business terms"
+    - "Highlight uncertainty and limitations"
+    - "Do not treat model outputs as guaranteed outcomes"
+
+  workflow:
+
+    elasticity_analysis:
+      - "Identify UPC"
+      - "Retrieve product data through Data MCP"
+      - "Calculate elasticity through Pricing MCP"
+      - "Interpret elasticity commercially"
+
+    price_change:
+      - "Retrieve product data"
+      - "Calculate elasticity"
+      - "Simulate proposed price"
+      - "Evaluate volume and revenue impact"
+      - "Explain commercial trade-offs"
+
+    price_optimization:
+      - "Retrieve product data"
+      - "Calculate elasticity"
+      - "Search feasible price range"
+      - "Evaluate revenue impact"
+      - "Present model-based pricing scenario"
+
+# ============================================================
+# Response Configuration
+# ============================================================
+
+response:
+
+  format:
+    - "Executive Takeaway"
+    - "Key Findings"
+    - "Commercial Implications"
+    - "Risks / Limitations"
+    - "Next Analysis"
+
+  concise: true
+
+  include_model_metrics: true
+
+  include_business_implications: true
