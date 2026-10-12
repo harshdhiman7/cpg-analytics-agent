@@ -143,5 +143,5 @@ MIT License
 
 Copyright (c) 2026 Harsh Dhiman
 
-## Author 
+## 👨🏻‍💻 Author 
 Harsh Dhiman
