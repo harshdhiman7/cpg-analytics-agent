@@ -64,7 +64,7 @@ ollama pull qwen2.5:3b
 ### 2. Install
 
 ```bash
-git clone <your-repo-url>
+git clone harshdhiman7/cpg-analytics-agent
 cd cpg-analytics-agent
 
 python -m venv .venv
