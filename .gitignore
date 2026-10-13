@@ -4,5 +4,6 @@ data/
 # Virtual env
 .venv
 .env
+pricing/
 
 .DS_Store
