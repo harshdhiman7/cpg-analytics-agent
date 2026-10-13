@@ -5,6 +5,11 @@ from sklearn.linear_model import LinearRegression
 import yaml
 import pandas as pd
 from xgboost import XGBRegressor
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 
 with open("config.yaml", "r") as file:
@@ -271,6 +276,8 @@ def _forecast_demand(f_level: str,
 
         if df.empty:
             return {"error": "Dataset is empty."}
+        else:
+            print(f'Loaded dataset with {len(df)} rows')
 
     except Exception as e:
         return {
@@ -291,9 +298,11 @@ def _forecast_demand(f_level: str,
                 )
             }
 
-        if N is not None:
-           horizon = int(N)
-                
+        if N is not None and N <= 0:
+           print(f'Warning: Invalid horizon {N}, using default from config')
+           horizon = int(config["forecast"]["horizon"])
+        elif N is not None:
+             horizon=int(N)
         else:
             horizon = int(config["forecast"]["horizon"])
         
@@ -584,6 +593,8 @@ def _forecast_demand(f_level: str,
             ) * 100
         )
 
+        wape= float(np.sum(np.abs(y_test.values-predictions))/np.sum(np.abs(y_test.values)))*100
+
         # ---------------------------------------------------------
         # 17. Return result
         # ---------------------------------------------------------
@@ -610,7 +621,8 @@ def _forecast_demand(f_level: str,
                 ),
                 "expected_volume_change_pct": pct_change,
                 "rmse": round(rmse, 2),
-                "mape_pct": round(mape, 2)
+                "mape_pct": round(mape, 2),
+                "wape_pct":round(wape,2)
             },
 
             "detailed_forecast": forecast_series
@@ -622,6 +634,24 @@ def _forecast_demand(f_level: str,
             "status": "error",
             "error": f"Forecasting failed: {str(e)}"
         }
+
+@mcp.tool()
+def demand_transfer(target_upc:int, price_change_pct:float,elasticity:float)-> dict:
+    if target_upc is None:
+        print(f'WARNING! Using fallback UPC {config["demand_transfer"]["fallback_upc"]}')
+
+    df=load_data()
+    if not df.empty:
+       logging.info(f'Loaded dataset with {len(df)} rows')
+
+    df=df[df["UPC"]==target_upc].copy()
+
+    vol_leaked= df.iloc[-1]["units"].values*(1+price_change_pct/100)^elasticity
+
+
+
+    return {"target_upc": target_upc,
+            "recepients": [recepients]}
 
 if __name__ == "__main__":
     mcp.run(transport="stdio")

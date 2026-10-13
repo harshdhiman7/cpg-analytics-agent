@@ -13,9 +13,9 @@ Built with **LangGraph** (agent orchestration), **MCP** (tool server), and **Oll
 
 Example questions:
 
-- *"What is the price elasticity for UPC 1111009477?"*
+- *"What is the price elasticity for UPC 3000006610"*
 - *"Forecast 8 weeks of demand for BAG SNACKS."*
-- *"Calculate elasticity for UPC 1111009477 and forecast COFFEE for 12 weeks."*
+- *"Calculate elasticity for UPC 3000006610 and forecast COLD CEREAL for 12 weeks."*
 
 ## 🏗️ Architecture
 

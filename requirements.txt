@@ -9,3 +9,9 @@ scikit-learn
 xgboost
 pyyaml
 openpyxl
+streamlit>=1.40
+langchain-core
+langchain-ollama
+langchain-mcp-adapters
+langgraph
+mcp

@@ -7,7 +7,10 @@ from langchain_core.messages import BaseMessage, SystemMessage, HumanMessage
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode, tools_condition
+import logging
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # =========================================================
 # 1. Define Agent State
@@ -297,6 +300,7 @@ SYSTEM_PROMPT = """
                 - Expected Volume Change:
                 - MAPE:
                 - RMSE:
+                - WAPE:
 
 
                 Forecast by Period:
@@ -309,6 +313,7 @@ SYSTEM_PROMPT = """
                 Provide 2–4 concise observations relevant to:
 
                 - demand planning
+                - Significance of MAPE and WAPE with respect to the forecast horizon
                 - inventory planning
                 - category performance
                 - expected demand movement
